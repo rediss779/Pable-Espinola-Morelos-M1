@@ -1,0 +1,108 @@
+import java.sql.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+public class BookingDAO {
+
+    public void reserve(Booking booking){
+        String sql="INSERT INTO bookings(username,type,date,time_in,time_out,status,room_number) VALUES(?,?,?,?,?,?,?)";
+        try(Connection conn=DatabaseConnection.connect();
+            PreparedStatement stmt=conn.prepareStatement(sql)){
+
+            stmt.setString(1,booking.getUsername());
+            stmt.setString(2,booking.getType());
+            stmt.setString(3,booking.getDate());
+            stmt.setString(4,booking.getTimeIn());
+            stmt.setString(5,booking.getTimeOut());
+            stmt.setString(6,booking.getStatus());
+            stmt.setInt(7, booking.getRoomNumber());
+
+            stmt.executeUpdate();
+            System.out.println("Booking successful.");
+        }catch(Exception e){ e.printStackTrace(); }
+    }
+
+    public void viewBookings(String username){
+        String sql="SELECT * FROM bookings WHERE username=?";
+        try(Connection conn=DatabaseConnection.connect();
+            PreparedStatement stmt=conn.prepareStatement(sql)){
+
+            stmt.setString(1,username);
+            ResultSet rs=stmt.executeQuery();
+
+            boolean empty = true;
+            while(rs.next()){
+                empty = false;
+                System.out.println("Type: "+rs.getString("type")+
+                        " | Date: "+rs.getString("date")+
+                        " | Time In: "+rs.getString("time_in")+
+                        " | Time Out: "+rs.getString("time_out")+
+                        " | Room Number: "+rs.getInt("room_number")+
+                        " | Status: "+rs.getString("status"));
+            }
+            if(empty) System.out.println("No bookings found.");
+        }catch(Exception e){ e.printStackTrace(); }
+    }
+
+    public void cancelBooking(String type,String date,String timeIn,String timeOut,String username,int roomNumber){
+        String sql="DELETE FROM bookings WHERE username=? AND type=? AND date=? AND time_in=? AND time_out=? AND room_number=?";
+        try(Connection conn=DatabaseConnection.connect();
+            PreparedStatement stmt=conn.prepareStatement(sql)){
+
+            stmt.setString(1,username);
+            stmt.setString(2,type);
+            stmt.setString(3,date);
+            stmt.setString(4,timeIn);
+            stmt.setString(5,timeOut);
+            stmt.setInt(6, roomNumber);
+
+            int rows = stmt.executeUpdate();
+            if(rows>0) System.out.println("Booking cancelled.");
+            else System.out.println("Booking not found.");
+        }catch(Exception e){ e.printStackTrace(); }
+    }
+
+    public void checkAvailability(String type,String date,String timeIn,String timeOut){
+        int max = (type.equals("workspace")) ? 20 : 10;
+        System.out.println("Available numbers:");
+        for(int i=1;i<=max;i++){
+            if(isRoomAvailable(type,date,timeIn,timeOut,i)){
+                System.out.print(i+" ");
+            }
+        }
+        System.out.println();
+    }
+
+    public boolean isRoomAvailable(String type, String date, String timeIn, String timeOut, int roomNumber) {
+        String sql = "SELECT * FROM bookings WHERE type=? AND date=? AND room_number=? AND status='reserved'";
+
+        try(Connection conn = DatabaseConnection.connect();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, type);
+            stmt.setString(2, date);
+            stmt.setInt(3, roomNumber);
+
+            ResultSet rs = stmt.executeQuery();
+
+            LocalTime newStart = LocalTime.parse(timeIn);
+            LocalTime newEnd = LocalTime.parse(timeOut);
+
+            while(rs.next()){
+                LocalTime existingStart = LocalTime.parse(rs.getString("time_in"));
+                LocalTime existingEnd = LocalTime.parse(rs.getString("time_out"));
+
+                if(newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart)){
+                    return false; // NOT AVAILABLE
+                }
+            }
+
+            return true; 
+
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+}
