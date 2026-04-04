@@ -93,7 +93,7 @@ public class BookingDAO {
                 LocalTime existingEnd = LocalTime.parse(rs.getString("time_out"));
 
                 if(newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart)){
-                    return false; // NOT AVAILABLE
+                    return false;
                 }
             }
 
