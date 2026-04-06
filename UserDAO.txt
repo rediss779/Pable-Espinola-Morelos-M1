@@ -6,8 +6,8 @@ public class UserDAO {
         try(Connection conn=DatabaseConnection.connect();
             PreparedStatement stmt=conn.prepareStatement(sql)){
 
-            stmt.setString(1,user.getUsername());
-            stmt.setString(2,user.getPassword());
+            stmt.setString(1,user.getUSERNAME());
+            stmt.setString(2,user.getPASSWORD());
             stmt.executeUpdate();
 
             System.out.println("\nAccount created.");
