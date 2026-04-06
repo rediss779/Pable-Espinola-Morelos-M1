@@ -19,8 +19,8 @@ public class Main {
             int choice=sc.nextInt(); sc.nextLine();
 
             if(choice==1){
-                System.out.print("\nUsername:"); String u=sc.nextLine();
-                System.out.print("Password:"); String p=sc.nextLine();
+                System.out.print("\nUsername:"); String u = sc.nextLine();
+                System.out.print("Password:"); String p = sc.nextLine();
 
                 if(userDAO.login(u,p)){
                     logged=true;
