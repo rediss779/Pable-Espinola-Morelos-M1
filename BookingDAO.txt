@@ -1,6 +1,5 @@
 import java.sql.*;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 public class BookingDAO {
 
@@ -9,13 +8,13 @@ public class BookingDAO {
         try(Connection conn=DatabaseConnection.connect();
             PreparedStatement stmt=conn.prepareStatement(sql)){
 
-            stmt.setString(1,booking.getUsername());
-            stmt.setString(2,booking.getType());
-            stmt.setString(3,booking.getDate());
-            stmt.setString(4,booking.getTimeIn());
-            stmt.setString(5,booking.getTimeOut());
-            stmt.setString(6,booking.getStatus());
-            stmt.setInt(7, booking.getRoomNumber());
+            stmt.setString(1,booking.getUSERNAME());
+            stmt.setString(2,booking.getTYPE());
+            stmt.setString(3,booking.getDATE());
+            stmt.setString(4,booking.getTIMEIN());
+            stmt.setString(5,booking.getTIMEOUT());
+            stmt.setString(6,booking.getSTATUS());
+            stmt.setInt(7, booking.getROOMNUMBER());
 
             stmt.executeUpdate();
             System.out.println("Booking successful.");
@@ -93,16 +92,14 @@ public class BookingDAO {
                 LocalTime existingEnd = LocalTime.parse(rs.getString("time_out"));
 
                 if(newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart)){
-                    return false; // NOT AVAILABLE
+                    return false;
                 }
             }
-
-            return true; 
+            return true;
 
         } catch(Exception e){
             e.printStackTrace();
         }
-
         return false;
     }
 }
